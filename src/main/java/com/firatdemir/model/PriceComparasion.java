@@ -1,5 +1,6 @@
 package com.firatdemir.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +18,7 @@ public class PriceComparasion {
 		@GeneratedValue(strategy = GenerationType.IDENTITY)
 		private Long id;
 		
-		@ManyToOne
+		@ManyToOne//(cascade = CascadeType.ALL)
 		@JoinColumn(name = "product_id")
 		private Product product;
 		

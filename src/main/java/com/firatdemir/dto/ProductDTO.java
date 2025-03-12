@@ -12,5 +12,7 @@ public class ProductDTO {
 	private String productName;
 	
 	private String barcode;
+
+	
 	
 }
