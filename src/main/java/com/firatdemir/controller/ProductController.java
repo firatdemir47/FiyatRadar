@@ -2,6 +2,7 @@ package com.firatdemir.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.firatdemir.dto.ProductDTO;
 import com.firatdemir.model.Product;
 import com.firatdemir.service.ProductService;
 
@@ -22,44 +24,52 @@ import com.firatdemir.service.ProductService;
 @RequestMapping("/api/products")
 public class ProductController {
 
-	 private final ProductService productService;
+	private final ProductService productService;
 
-	    public ProductController(ProductService productService) {
-	        this.productService = productService;
-	    }
+	public ProductController(ProductService productService) {
+		this.productService = productService;
+	}
 
-	    // Ürün ekleme
-	    @PostMapping("/save")
-	    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
-	        Product createProduct = productService.saveProduct(product);
-	        return new ResponseEntity<>(createProduct, HttpStatus.CREATED);
-	    }
+	// Ürün ekleme
 
-	    // Ürünleri listeleme
-	    @GetMapping
-	    public List<Product> getAllProducts() {
-	        return productService.getAllProducts();
-	    }
+	@PostMapping("/save")
+	public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
+		Product product = productService.saveProduct(productDTO);
+		return new ResponseEntity<>(convertToDTO(product), HttpStatus.CREATED);
+	}
 
-	    // ID ile ürün getirme
-	    @GetMapping("/{id}")
-	    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-	        Product product = productService.getProductById(id); // Optional yerine direkt Product döndürüyoruz
-	        return ResponseEntity.ok(product);
-	    }
+	// Ürünleri listeleme
 
-	    // Ürün güncelleme
-	    @PutMapping("/{id}")
-	    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
-	        Product updatedProduct = productService.updateProduct(id, product);
-	        return ResponseEntity.ok(updatedProduct);
-	    }
+	@GetMapping
+	public List<ProductDTO> getAllProducts() {
+		List<Product> products = productService.getAllProducts();
+		return products.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
 
-	    // Ürün silme
-	    @DeleteMapping("/{id}")
-	    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-	        productService.deleteProduct(id);
-	        return ResponseEntity.noContent().build();
-	    }
+	// ID ile ürün getirme
+	@GetMapping("/{id}")
+	public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+		Product product = productService.getProductById(id);
+		return ResponseEntity.ok(convertToDTO(product));
+	}
+
+	// Ürün güncelleme
+	@PutMapping("/{id}")
+	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
+		Product updatedProduct = productService.updateProduct(id, productDTO);
+		return ResponseEntity.ok(convertToDTO(updatedProduct));
+	}
+
+	// Ürün silme
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+		productService.deleteProduct(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	private ProductDTO convertToDTO(Product product) {
+		return new ProductDTO(product.getName(), // Entity'deki name, DTO'da productName olarak yer alır.
+				product.getBarcode(), product.getDescription(), product.getPrice(), product.getStoreName());
+	}
 
 }
