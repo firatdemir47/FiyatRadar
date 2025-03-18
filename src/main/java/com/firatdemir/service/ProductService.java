@@ -22,13 +22,13 @@ public class ProductService {
 
 	// Ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
-	    Product product = new Product();
-	    product.setName(productDTO.getProductName());  // `productName` yerine `name`
-	    product.setBarcode(productDTO.getBarcode());
-	    product.setDescription(productDTO.getDescription());
-	    product.setPrice(productDTO.getPrice());
-	    product.setStoreName(productDTO.getStoreName());
-	    return productRepository.save(product);
+		Product product = new Product();
+		product.setName(productDTO.getProductName()); // `productName` yerine `name`
+		product.setBarcode(productDTO.getBarcode());
+		product.setDescription(productDTO.getDescription());
+		product.setPrice(productDTO.getPrice());
+		product.setStoreName(productDTO.getStoreName());
+		return productRepository.save(product);
 	}
 
 	// Tüm ürünleri listeleme
@@ -43,14 +43,7 @@ public class ProductService {
 	}
 
 	// Ürün güncelleme
-	/*
-	 * public Product updateProduct(Long id, Product product) { Product
-	 * existingProduct = getProductById(id);
-	 * existingProduct.setName(product.getName());
-	 * existingProduct.setBarcode(product.getBarcode());
-	 * existingProduct.setPrice(product.getPrice()); return
-	 * productRepository.save(existingProduct); }
-	 */
+
 	public Product updateProduct(Long id, ProductDTO productDTO) {
 		Product existingProduct = getProductById(id);
 		existingProduct.setName(productDTO.getProductName());
@@ -59,6 +52,37 @@ public class ProductService {
 		existingProduct.setPrice(productDTO.getPrice());
 		existingProduct.setStoreName(productDTO.getStoreName());
 		return productRepository.save(existingProduct);
+	}
+
+	// Ürün arama
+	public List<Product> searchProducts(String name, String category) {
+		if (name != null && category != null) {
+			return productRepository.findByNameContainingAndCategoryContaining(name, category);
+		} else if (name != null) {
+			return productRepository.findByNameContaining(name);
+		} else if (category != null) {
+			return productRepository.findByCategoryContaining(category);
+		} else {
+			return productRepository.findAll(); // Eğer hiç filtreleme yapılmazsa, tüm ürünleri getir
+		}
+	}
+
+	// Barkodla ürün arama
+	public Product findByBarcode(String barcode) {
+		return productRepository.findByBarcode(barcode);
+	}
+
+	// Ürün filtreleme
+	public List<Product> filterProducts(Double minPrice, Double maxPrice, String category) {
+		if (minPrice != null && maxPrice != null && category != null) {
+			return productRepository.findByPriceBetweenAndCategory(minPrice, maxPrice, category);
+		} else if (minPrice != null && maxPrice != null) {
+			return productRepository.findByPriceBetween(minPrice, maxPrice);
+		} else if (category != null) {
+			return productRepository.findByCategoryContaining(category);
+		} else {
+			return productRepository.findAll(); // Eğer hiç filtreleme yapılmazsa, tüm ürünleri getir
+		}
 	}
 
 	public void deleteProduct(Long id) {

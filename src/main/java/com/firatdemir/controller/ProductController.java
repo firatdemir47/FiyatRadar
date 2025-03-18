@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.firatdemir.dto.ProductDTO;
@@ -65,6 +66,34 @@ public class ProductController {
 	public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
 		productService.deleteProduct(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	// Barkod ile ürün arama
+	@GetMapping("/searchByBarcode")
+	public ResponseEntity<ProductDTO> searchByBarcode(@RequestParam String barcode) {
+		Product product = productService.findByBarcode(barcode);
+		if (product != null) {
+			ProductDTO productDTO = convertToDTO(product);
+			return ResponseEntity.ok(productDTO);
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+		}
+	}
+
+	// Ürün arama
+	@GetMapping("/search")
+	public List<ProductDTO> searchProducts(@RequestParam(required = false) String name,
+			@RequestParam(required = false) String category) {
+		List<Product> products = productService.searchProducts(name, category);
+		return products.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
+
+	// Ürün filtreleme
+	@GetMapping("/filter")
+	public List<ProductDTO> filterProducts(@RequestParam(required = false) Double minPrice,
+			@RequestParam(required = false) Double maxPrice, @RequestParam(required = false) String category) {
+		List<Product> products = productService.filterProducts(minPrice, maxPrice, category);
+		return products.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
 
 	private ProductDTO convertToDTO(Product product) {

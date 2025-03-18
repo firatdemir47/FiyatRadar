@@ -21,6 +21,9 @@ public class Product {
 	 @Column(unique = true)
 	private String barcode;  // Ürünün barkodu
 	
+	 @Column(name = "category")
+	    private String category;
+	 
 	private String name;  // Ürünün adı
 	
 	private String description; // Ürünün açıklaması
