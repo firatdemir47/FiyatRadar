@@ -67,9 +67,18 @@ public class ProductService {
 		}
 	}
 
+	public void save(Product product) {
+		productRepository.save(product); // Spring Data JPA'nın save metodunu kullanarak veritabanına kaydediyoruz
+	}
+
 	// Barkodla ürün arama
 	public Product findByBarcode(String barcode) {
 		return productRepository.findByBarcode(barcode);
+	}
+
+	// Barkodun geçerli olup olmadığını kontrol eder
+	public boolean isBarcodeValid(String barcode) {
+		return barcode != null && barcode.length() == 12; // Örnek: 12 haneli barkod geçerli kabul ediliyor
 	}
 
 	// Ürün filtreleme

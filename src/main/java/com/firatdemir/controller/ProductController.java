@@ -68,15 +68,43 @@ public class ProductController {
 		return ResponseEntity.noContent().build();
 	}
 
-	// Barkod ile ürün arama
-	@GetMapping("/searchByBarcode")
-	public ResponseEntity<ProductDTO> searchByBarcode(@RequestParam String barcode) {
+		// Barkod ile ürün arama
+		@GetMapping("/searchByBarcode")
+		public ResponseEntity<ProductDTO> searchByBarcode(@RequestParam String barcode) {
+			Product product = productService.findByBarcode(barcode);
+			if (product != null) {
+				ProductDTO productDTO = convertToDTO(product);
+				return ResponseEntity.ok(productDTO);
+			} else {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			}
+		}
+
+	// barcode  Fiyatı güncelleyen endpoint
+	@PutMapping("/updatePrice")
+	public ResponseEntity<ProductDTO> updatePrice(@RequestParam String barcode, @RequestParam double newPrice) {
 		Product product = productService.findByBarcode(barcode);
 		if (product != null) {
+			product.setPrice(newPrice);
+			productService.save(product); // Güncel ürünü kaydeder
 			ProductDTO productDTO = convertToDTO(product);
-			return ResponseEntity.ok(productDTO);
+			return ResponseEntity.ok(productDTO); // Güncel ürünü döndürür
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Ürün bulunmazsa 404 döndürür
+		}
+	}
+
+	// Eski barkodu alıp, yeni barkod ile günceller
+	@PutMapping("/updateBarcode")
+	public ResponseEntity<ProductDTO> updateBarcode(@RequestParam String oldBarcode, @RequestParam String newBarcode) {
+		Product product = productService.findByBarcode(oldBarcode);
+		if (product != null) {
+			product.setBarcode(newBarcode); // Yeni barkodu atar
+			productService.save(product); // Güncel ürünü kaydeder
+			ProductDTO productDTO = convertToDTO(product);
+			return ResponseEntity.ok(productDTO); // Güncellenmiş ürünü döndürür
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Ürün bulunmazsa 404 döndürür
 		}
 	}
 
