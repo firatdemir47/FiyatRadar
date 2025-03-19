@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.firatdemir.dto.ProductDTO;
+import com.firatdemir.mapper.ProductMapper;
 import com.firatdemir.model.Product;
 import com.firatdemir.service.ProductService;
 
@@ -26,39 +27,40 @@ import com.firatdemir.service.ProductService;
 public class ProductController {
 
 	private final ProductService productService;
+	private final ProductMapper productMapper;
 
-	public ProductController(ProductService productService) {
+	@Autowired
+	public ProductController(ProductService productService, ProductMapper productMapper) {
 		this.productService = productService;
+		this.productMapper = productMapper;
 	}
 
 	// Ürün ekleme
-
 	@PostMapping("/save")
 	public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
 		Product product = productService.saveProduct(productDTO);
-		return new ResponseEntity<>(convertToDTO(product), HttpStatus.CREATED);
+		return new ResponseEntity<>(productMapper.toDTO(product), HttpStatus.CREATED); // DTO'ya dönüştürüp döndür
 	}
 
 	// Ürünleri listeleme
-
 	@GetMapping
 	public List<ProductDTO> getAllProducts() {
 		List<Product> products = productService.getAllProducts();
-		return products.stream().map(this::convertToDTO).collect(Collectors.toList());
+		return products.stream().map(productMapper::toDTO).collect(Collectors.toList()); // Stream kullanarak dönüşüm
 	}
 
 	// ID ile ürün getirme
 	@GetMapping("/{id}")
 	public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
 		Product product = productService.getProductById(id);
-		return ResponseEntity.ok(convertToDTO(product));
+		return ResponseEntity.ok(productMapper.toDTO(product)); // DTO'ya dönüştürüp döndür
 	}
 
 	// Ürün güncelleme
 	@PutMapping("/{id}")
 	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
 		Product updatedProduct = productService.updateProduct(id, productDTO);
-		return ResponseEntity.ok(convertToDTO(updatedProduct));
+		return ResponseEntity.ok(productMapper.toDTO(updatedProduct)); // DTO'ya dönüştürüp döndür
 	}
 
 	// Ürün silme
@@ -68,29 +70,29 @@ public class ProductController {
 		return ResponseEntity.noContent().build();
 	}
 
-		// Barkod ile ürün arama
-		@GetMapping("/searchByBarcode")
-		public ResponseEntity<ProductDTO> searchByBarcode(@RequestParam String barcode) {
-			Product product = productService.findByBarcode(barcode);
-			if (product != null) {
-				ProductDTO productDTO = convertToDTO(product);
-				return ResponseEntity.ok(productDTO);
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-			}
+	// Barkod ile ürün arama
+	@GetMapping("/searchByBarcode")
+	public ResponseEntity<ProductDTO> searchByBarcode(@RequestParam String barcode) {
+		Product product = productService.findByBarcode(barcode);
+		if (product != null) {
+			ProductDTO productDTO = productMapper.toDTO(product); // DTO'ya dönüştürüp döndür
+			return ResponseEntity.ok(productDTO);
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
+	}
 
-	// barcode  Fiyatı güncelleyen endpoint
+	// barcode fiyatını güncelleyen endpoint
 	@PutMapping("/updatePrice")
 	public ResponseEntity<ProductDTO> updatePrice(@RequestParam String barcode, @RequestParam double newPrice) {
 		Product product = productService.findByBarcode(barcode);
 		if (product != null) {
 			product.setPrice(newPrice);
-			productService.save(product); // Güncel ürünü kaydeder
-			ProductDTO productDTO = convertToDTO(product);
-			return ResponseEntity.ok(productDTO); // Güncel ürünü döndürür
+			productService.save(product);
+			ProductDTO productDTO = productMapper.toDTO(product);
+			return ResponseEntity.ok(productDTO);
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Ürün bulunmazsa 404 döndürür
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
 	}
 
@@ -99,12 +101,12 @@ public class ProductController {
 	public ResponseEntity<ProductDTO> updateBarcode(@RequestParam String oldBarcode, @RequestParam String newBarcode) {
 		Product product = productService.findByBarcode(oldBarcode);
 		if (product != null) {
-			product.setBarcode(newBarcode); // Yeni barkodu atar
-			productService.save(product); // Güncel ürünü kaydeder
-			ProductDTO productDTO = convertToDTO(product);
-			return ResponseEntity.ok(productDTO); // Güncellenmiş ürünü döndürür
+			product.setBarcode(newBarcode);
+			productService.save(product);
+			ProductDTO productDTO = productMapper.toDTO(product);
+			return ResponseEntity.ok(productDTO);
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Ürün bulunmazsa 404 döndürür
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
 	}
 
@@ -113,7 +115,7 @@ public class ProductController {
 	public List<ProductDTO> searchProducts(@RequestParam(required = false) String name,
 			@RequestParam(required = false) String category) {
 		List<Product> products = productService.searchProducts(name, category);
-		return products.stream().map(this::convertToDTO).collect(Collectors.toList());
+		return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
 	}
 
 	// Ürün filtreleme
@@ -121,12 +123,7 @@ public class ProductController {
 	public List<ProductDTO> filterProducts(@RequestParam(required = false) Double minPrice,
 			@RequestParam(required = false) Double maxPrice, @RequestParam(required = false) String category) {
 		List<Product> products = productService.filterProducts(minPrice, maxPrice, category);
-		return products.stream().map(this::convertToDTO).collect(Collectors.toList());
-	}
-
-	private ProductDTO convertToDTO(Product product) {
-		return new ProductDTO(product.getName(), // Entity'deki name, DTO'da productName olarak yer alır.
-				product.getBarcode(), product.getDescription(), product.getPrice(), product.getStoreName());
+		return products.stream().map(productMapper::toDTO).collect(Collectors.toList());
 	}
 
 }

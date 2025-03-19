@@ -47,6 +47,19 @@
     <artifactId>spring-boot-starter-test</artifactId>
     <scope>test</scope>
 </dependency>
+<!-- MapStruct Dependency -->
+  <dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct</artifactId>
+    <version>1.5.3.Final</version> <!-- Mevcut versiyona göre kontrol edin -->
+</dependency>
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct-processor</artifactId>
+    <version>1.5.3.Final</version>
+    <scope>provided</scope>
+</dependency>
+	
 
 		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -83,11 +96,7 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.f.ratdemir</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		
 	</dependencies>
 
 	<build>
