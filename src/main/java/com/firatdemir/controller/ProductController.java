@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.firatdemir.dto.ProductDTO;
 import com.firatdemir.mapper.ProductMapper;
+import com.firatdemir.model.PriceComparasion;
 import com.firatdemir.model.Product;
 import com.firatdemir.service.ProductService;
 
@@ -33,6 +34,11 @@ public class ProductController {
 	public ProductController(ProductService productService, ProductMapper productMapper) {
 		this.productService = productService;
 		this.productMapper = productMapper;
+	}
+	//ürünün fiyatlarını karşılaştırmak için 
+	@GetMapping("/{barcode}/compare-prices")
+	public List<PriceComparasion> getPriceComparisons(@PathVariable String barcode) {
+		return productService.getPriceComparisonsByBarcode(barcode);
 	}
 
 	// Ürün ekleme

@@ -1,31 +1,38 @@
 package com.firatdemir.service;
 
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.firatdemir.dto.ProductDTO;
+import com.firatdemir.exception.InvalidBarcodeException;
 import com.firatdemir.exception.ResourceNotFoundException;
 import com.firatdemir.mapper.ProductMapper;
+import com.firatdemir.model.PriceComparasion;
 import com.firatdemir.model.Product;
+import com.firatdemir.repository.PriceComparisonRepository;
 import com.firatdemir.repository.ProductRepository;
 
 @Service
 public class ProductService {
 
 	private final ProductRepository productRepository;
+	private final PriceComparisonRepository priceComparisonRepository;
 	private final ProductMapper productMapper;
-	
+
 	@Autowired
-	public ProductService(ProductRepository productRepository, ProductMapper productMapper) {
+	public ProductService(ProductRepository productRepository, PriceComparisonRepository priceComparisonRepository,
+			ProductMapper productMapper) {
 		this.productRepository = productRepository;
+		this.priceComparisonRepository = priceComparisonRepository;
 		this.productMapper = productMapper;
 	}
 
 	// Ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
+		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
 		Product product = productMapper.toEntity(productDTO); // DTO'yu entity'ye dönüştür
 		return productRepository.save(product);
 	}
@@ -43,6 +50,7 @@ public class ProductService {
 
 	// Ürün güncelleme
 	public Product updateProduct(Long id, ProductDTO productDTO) {
+		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
 		Product existingProduct = getProductById(id);
 		productMapper.updateEntityFromDTO(productDTO, existingProduct); // Mevcut entity'yi DTO ile güncelle
 		return productRepository.save(existingProduct);
@@ -71,8 +79,11 @@ public class ProductService {
 	}
 
 	// Barkodun geçerli olup olmadığını kontrol eder
-	public boolean isBarcodeValid(String barcode) {
-		return barcode != null && barcode.length() == 12; // Örnek: 12 haneli barkod geçerli kabul ediliyor
+	private void isBarcodeValid(String barcode) {
+		if (barcode == null || !barcode.matches("\\d{12,13}")) {
+			throw new InvalidBarcodeException(
+					"Geçersiz barkod: Barkod 12 veya 13 haneli olmalı ve sadece sayılardan oluşmalıdır.");
+		}
 	}
 
 	// Ürün filtreleme
@@ -86,6 +97,23 @@ public class ProductService {
 		} else {
 			return productRepository.findAll(); // Eğer hiç filtreleme yapılmazsa, tüm ürünleri getir
 		}
+	}
+
+	// Barkod ile fiyat karşılaştırma metodu
+	public List<PriceComparasion> getPriceComparisonsByBarcode(String barcode) {
+	    Product product = productRepository.findByBarcode(barcode);
+	    if (product == null) {
+	        throw new ResourceNotFoundException("Barkod ile eşleşen ürün bulunamadı: " + barcode);
+	    }
+
+	    List<PriceComparasion> priceComparisons = priceComparisonRepository.findByProductId(product.getId());
+	    if (priceComparisons.isEmpty()) {
+	        throw new ResourceNotFoundException("Bu ürün için fiyat karşılaştırması bulunamadı.");
+	    }
+
+	    return priceComparisons.stream()
+	            .sorted((p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice()))
+	            .collect(Collectors.toList());
 	}
 
 	public void deleteProduct(Long id) {
