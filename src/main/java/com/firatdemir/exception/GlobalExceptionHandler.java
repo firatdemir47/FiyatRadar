@@ -40,18 +40,18 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
 
-	// geçersiz veya hatalı barkod verisi
+	// Geçersiz veya hatalı barkod verisi
 	@ExceptionHandler(InvalidBarcodeException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidBarcodeException(InvalidBarcodeException ex) {
-		// Hata kaydını tutuyoruz
-		logger.error("Invalid barcode error: ", ex);
+		// Hata kaydını daha açıklayıcı yapalım
+		logger.error("Barkod doğrulama hatası: {}", ex.getMessage());
 
 		// ErrorResponse oluşturuyoruz
 		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(),
-				"Barkodun geçerliliği ile ilgili hata.");
+				"Barkod geçerlilik kontrolünde hata oluştu.");
 
 		// HTTP 400 (Bad Request) ile hata mesajını döndürüyoruz
-		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+		return ResponseEntity.badRequest().body(errorResponse);
 	}
 
 	// Validation hatası (parametre doğrulama hatası)

@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,19 +18,21 @@ public class Product {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	 @Column(unique = true)
-	private String barcode;  // Ürünün barkodu
-	
-	 @Column(name = "category")
-	    private String category;
-	 
-	private String name;  // Ürünün adı
-	
+
+	@Column(unique = true)
+	private String barcode; // Ürünün barkodu
+
+	@Column(name = "category")
+	private String category;
+
+	private String name; // Ürünün adı
+
 	private String description; // Ürünün açıklaması
-	
-	private double price;  // Ürünün fiyatı	
-	
+
+	private double price; // Ürünün fiyatı
+
 	private String storeName; // Ürünün satıldığı marketin adı
 
+	@PositiveOrZero(message = "Stok miktarı negatif olamaz.")
+	private int stock; // Ürünün stok miktarı
 }

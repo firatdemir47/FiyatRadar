@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.firatdemir.dto.ProductDTO;
 import com.firatdemir.exception.InvalidBarcodeException;
+import com.firatdemir.exception.InvalidProductException;
 import com.firatdemir.exception.ResourceNotFoundException;
 import com.firatdemir.mapper.ProductMapper;
 import com.firatdemir.model.PriceComparasion;
@@ -33,8 +34,12 @@ public class ProductService {
 	// Ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
 		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
+		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
+		validateStock(productDTO.getStock()); // Stok kontrolü
+		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
+
 		Product product = productMapper.toEntity(productDTO); // DTO'yu entity'ye dönüştür
-		return productRepository.save(product);
+		return productRepository.save(product); // Ürünü kaydet
 	}
 
 	// Tüm ürünleri listeleme
@@ -49,10 +54,18 @@ public class ProductService {
 	}
 
 	// Ürün güncelleme
+
 	public Product updateProduct(Long id, ProductDTO productDTO) {
-		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
+		isBarcodeValid(productDTO.getBarcode()); // Barkod kontrolü
+		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
+
+		// Eğer stok eklediysen bunu da kontrol edebilirsin
+		validateStock(productDTO.getStock()); // Stok kontrolü
+
+		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
+
 		Product existingProduct = getProductById(id);
-		productMapper.updateEntityFromDTO(productDTO, existingProduct); // Mevcut entity'yi DTO ile güncelle
+		productMapper.updateEntityFromDTO(productDTO, existingProduct);
 		return productRepository.save(existingProduct);
 	}
 
@@ -86,6 +99,30 @@ public class ProductService {
 		}
 	}
 
+	// Fiyat geçerli mi kontrol eder
+	private void validatePrice(Double price) {
+		if (price == null || price < 0) {
+			throw new InvalidProductException("Geçersiz fiyat: Fiyat negatif olamaz.");
+		}
+	}
+
+	// Stok geçerli mi kontrol eder
+	private void validateStock(Integer stock) {
+		if (stock == null || stock < 0) {
+			throw new InvalidProductException("Geçersiz stok: Stok miktarı negatif olamaz.");
+		}
+	}
+
+	// Ürün adı geçerli mi kontrol eder
+	private void validateProductName(String name) {
+		if (name == null || name.trim().isEmpty()) {
+			throw new InvalidProductException("Geçersiz ürün adı: Ürün adı boş olamaz.");
+		}
+		if (name.length() > 100) {
+			throw new InvalidProductException("Geçersiz ürün adı: Ürün adı 100 karakterden uzun olamaz.");
+		}
+	}
+
 	// Ürün filtreleme
 	public List<Product> filterProducts(Double minPrice, Double maxPrice, String category) {
 		if (minPrice != null && maxPrice != null && category != null) {
@@ -101,19 +138,18 @@ public class ProductService {
 
 	// Barkod ile fiyat karşılaştırma metodu
 	public List<PriceComparasion> getPriceComparisonsByBarcode(String barcode) {
-	    Product product = productRepository.findByBarcode(barcode);
-	    if (product == null) {
-	        throw new ResourceNotFoundException("Barkod ile eşleşen ürün bulunamadı: " + barcode);
-	    }
+		Product product = productRepository.findByBarcode(barcode);
+		if (product == null) {
+			throw new ResourceNotFoundException("Barkod ile eşleşen ürün bulunamadı: " + barcode);
+		}
 
-	    List<PriceComparasion> priceComparisons = priceComparisonRepository.findByProductId(product.getId());
-	    if (priceComparisons.isEmpty()) {
-	        throw new ResourceNotFoundException("Bu ürün için fiyat karşılaştırması bulunamadı.");
-	    }
+		List<PriceComparasion> priceComparisons = priceComparisonRepository.findByProductId(product.getId());
+		if (priceComparisons.isEmpty()) {
+			throw new ResourceNotFoundException("Bu ürün için fiyat karşılaştırması bulunamadı.");
+		}
 
-	    return priceComparisons.stream()
-	            .sorted((p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice()))
-	            .collect(Collectors.toList());
+		return priceComparisons.stream().sorted((p1, p2) -> Double.compare(p1.getPrice(), p2.getPrice()))
+				.collect(Collectors.toList());
 	}
 
 	public void deleteProduct(Long id) {

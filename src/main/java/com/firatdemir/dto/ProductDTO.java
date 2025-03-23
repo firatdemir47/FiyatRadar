@@ -2,6 +2,7 @@ package com.firatdemir.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,9 @@ public class ProductDTO {
 	@Positive(message = "Fiyat pozitif olmalıdır.")
 	private double price;
 
+	@PositiveOrZero(message = "Stok negatif olamaz.")
+	private int stock;
+	
 	private String storeName;
 
 }
