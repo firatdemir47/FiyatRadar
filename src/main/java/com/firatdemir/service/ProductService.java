@@ -35,7 +35,7 @@ public class ProductService {
 	public Product saveProduct(ProductDTO productDTO) {
 		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
 		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
-		validateStock(productDTO.getStock()); // Stok kontrolü
+		//validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif edilecek 
 		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
 
 		Product product = productMapper.toEntity(productDTO); // DTO'yu entity'ye dönüştür
@@ -59,8 +59,8 @@ public class ProductService {
 		isBarcodeValid(productDTO.getBarcode()); // Barkod kontrolü
 		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
 
-		// Eğer stok eklediysen bunu da kontrol edebilirsin
-		validateStock(productDTO.getStock()); // Stok kontrolü
+		 
+		//validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif edilecek 
 
 		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
 

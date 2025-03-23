@@ -18,7 +18,7 @@ public class ProductMapperImpl  implements ProductMapper{
         product.setBarcode(productDTO.getBarcode());
         product.setDescription(productDTO.getDescription());
         product.setPrice(productDTO.getPrice());
-        // Eğer category bilgisi gerekiyorsa, buraya ekleyebilirsiniz.
+        // Eğer category bilgisi gerekiyorsa, buraya ekleyebiliriz
         return product;
     }
 

@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
 	// Geçersiz veya hatalı barkod verisi
 	@ExceptionHandler(InvalidBarcodeException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidBarcodeException(InvalidBarcodeException ex) {
-		// Hata kaydını daha açıklayıcı yapalım
+		// Hata kaydını daha açıklayıcı yaptık
 		logger.error("Barkod doğrulama hatası: {}", ex.getMessage());
 
 		// ErrorResponse oluşturuyoruz
@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
 		result.getAllErrors().forEach(error -> {
 			errorMessages.append(error.getDefaultMessage()).append(", ");
 		});
-		errorMessages.setLength(errorMessages.length() - 2); // Son virgülü kaldırıyoruz
+		errorMessages.setLength(errorMessages.length() - 2); 
 		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Validation error",
 				errorMessages.toString());
 		return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);

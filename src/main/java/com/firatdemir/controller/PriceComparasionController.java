@@ -45,7 +45,7 @@ public class PriceComparasionController {
             product.setBarcode(priceComparisonDTO.getProductBarcode());
             product.setPrice(priceComparisonDTO.getPrice());
             product.setStoreName(priceComparisonDTO.getStoreName());
-            product.setName("Default Product");  // Burada isterseniz name'i almak da gerekebilir
+            product.setName("Default Product");  // Burada istersek name'i almak da gerekebilir
             productRepository.save(product);  // Ürünü veritabanına kaydediyoruz
         }
 
@@ -70,9 +70,9 @@ public class PriceComparasionController {
 
 	// PriceComparisonDTO'dan PriceComparasion entity'sine dönüştürme
 	private PriceComparasion convertToEntity(PriceComparisonDTO priceComparisonDTO) {
-		Product product = new Product(); // Barcode'a göre Product'ı getirebilirsiniz
+		Product product = new Product(); // Barcode'a göre Product'ı getirebiliriz
 		product.setBarcode(priceComparisonDTO.getProductBarcode()); // Bu kısmı, ilgili barcode'a göre ürünü almak için
-																	// geliştirebilirsiniz
+																	// geliştirebiliriz
 		PriceComparasion priceComparasion = new PriceComparasion();
 		priceComparasion.setProduct(product);
 		priceComparasion.setPrice(priceComparisonDTO.getPrice());

@@ -1,6 +1,5 @@
 package com.firatdemir.service;
 
-import java.security.PublicKey;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;

@@ -27,8 +27,8 @@ public class ProductDTO {
 	@Positive(message = "Fiyat pozitif olmalıdır.")
 	private double price;
 
-	@PositiveOrZero(message = "Stok negatif olamaz.")
-	private int stock;
+	/*@PositiveOrZero(message = "Stok negatif olamaz.")
+	private int stock;*/
 	
 	private String storeName;
 
