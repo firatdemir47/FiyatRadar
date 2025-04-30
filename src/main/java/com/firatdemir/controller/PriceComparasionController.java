@@ -18,8 +18,12 @@ import com.firatdemir.model.Product;
 import com.firatdemir.repository.ProductRepository;
 import com.firatdemir.service.PriceComparisonService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/price-comparisons")
+@Tag(name = "Fiyat Karşılaştırmaları", description = "Ürün fiyatlarının karşılaştırıldığı ve kaydedildiği işlemler")
 public class PriceComparasionController {
 
 	private final PriceComparisonService priceComparisonService;
@@ -32,8 +36,8 @@ public class PriceComparasionController {
 		this.productRepository = productRepository;
 	}
 
-	// fiyat karşılaştırma ekleme 
-
+	// fiyat karşılaştırma ekleme
+	@Operation(summary = "Yeni fiyat karşılaştırması ekle", description = "Yeni fiyat karşılaştırması ekler. Eğer ürün yoksa, yeni ürün oluşturur.")
 	@PostMapping
 	public ResponseEntity<PriceComparasion> createPriceComparison(@RequestBody PriceComparisonDTO priceComparisonDTO) {
 		// PriceComparisonDTO'dan barcode alınıyor
@@ -61,8 +65,9 @@ public class PriceComparasionController {
 
 		return new ResponseEntity<>(createdPriceComparasion, HttpStatus.CREATED);
 	}
-	// tüm fiyat karşılaştırmaları listeleme
 
+	// tüm fiyat karşılaştırmaları listeleme
+	@Operation(summary = "Tüm fiyat karşılaştırmalarını listele", description = "Veritabanındaki tüm fiyat karşılaştırmalarını listeler.")
 	@GetMapping
 	public List<PriceComparisonDTO> getAllPriceComparisons() {
 		List<PriceComparasion> priceComparasions = priceComparisonService.getAllPriceComparasions();

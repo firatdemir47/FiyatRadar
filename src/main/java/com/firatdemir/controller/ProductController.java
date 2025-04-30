@@ -1,7 +1,7 @@
 package com.firatdemir.controller;
 
 import java.util.List;
-import java.util.Optional;
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,28 +24,33 @@ import com.firatdemir.model.Product;
 
 import com.firatdemir.service.ProductService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/products")
+@Tag(name = "Ürün İşlemleri", description = "Ürün ekleme, silme, güncelleme ve arama işlemleri")
 public class ProductController {
 
 	private final ProductService productService;
 	private final ProductMapper productMapper;
-	
+
 	@Autowired
 	public ProductController(ProductService productService, ProductMapper productMapper) {
 		this.productService = productService;
 		this.productMapper = productMapper;
-		
+
 	}
-	
-	 
+
 	// ürünün fiyatlarını karşılaştırmak için
+	@Operation(summary = "Ürün fiyatlarını karşılaştır", description = "Barkod bilgisi ile ürünlerin fiyatlarını karşılaştırır.")
 	@GetMapping("/{barcode}/compare-prices")
 	public List<PriceComparasion> getPriceComparisons(@PathVariable String barcode) {
 		return productService.getPriceComparisonsByBarcode(barcode);
 	}
 
 	// Ürün ekleme
+	@Operation(summary = "Yeni ürün ekle", description = "Yeni bir ürün ekler.")
 	@PostMapping("/save")
 	public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
 		Product product = productService.saveProduct(productDTO);
@@ -53,6 +58,7 @@ public class ProductController {
 	}
 
 	// Ürünleri listeleme
+	@Operation(summary = "Tüm ürünleri getir", description = "Veritabanındaki tüm ürünleri listeler")
 	@GetMapping
 	public List<ProductDTO> getAllProducts() {
 		List<Product> products = productService.getAllProducts();
@@ -60,6 +66,7 @@ public class ProductController {
 	}
 
 	// ID ile ürün getirme
+	@Operation(summary = "ID ile ürün getir", description = "Verilen ID ile bir ürünü getirir.")
 	@GetMapping("/{id}")
 	public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
 		Product product = productService.getProductById(id);
@@ -67,6 +74,7 @@ public class ProductController {
 	}
 
 	// Ürün güncelleme
+	@Operation(summary = "Ürünü güncelle", description = "Verilen ID ile bir ürünü günceller.")
 	@PutMapping("/{id}")
 	public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long id, @RequestBody ProductDTO productDTO) {
 		Product updatedProduct = productService.updateProduct(id, productDTO);
@@ -74,6 +82,7 @@ public class ProductController {
 	}
 
 	// Ürün silme
+	@Operation(summary = "Ürünü sil", description = "Verilen ID ile bir ürünü siler.")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
 		productService.deleteProduct(id);
@@ -81,6 +90,7 @@ public class ProductController {
 	}
 
 	// Barkod ile ürün arama
+	@Operation(summary = "Barkod ile ürün arama", description = "Barkod bilgisi ile bir ürünü arar.")
 	@GetMapping("/searchByBarcode")
 	public ResponseEntity<ProductDTO> searchByBarcode(@RequestParam String barcode) {
 		Product product = productService.findByBarcode(barcode);
@@ -93,6 +103,7 @@ public class ProductController {
 	}
 
 	// barcode fiyatını güncelleyen endpoint
+	@Operation(summary = "Barkod fiyatını güncelle", description = "Barkod bilgisi ile ürünün fiyatını günceller.")
 	@PutMapping("/updatePrice")
 	public ResponseEntity<ProductDTO> updatePrice(@RequestParam String barcode, @RequestParam double newPrice) {
 		Product product = productService.findByBarcode(barcode);
@@ -107,6 +118,7 @@ public class ProductController {
 	}
 
 	// Eski barkodu alıp, yeni barkod ile günceller
+	@Operation(summary = "Barkodu güncelle", description = "Eski barkod bilgisi ile yeni barkod bilgisini değiştirir.")
 	@PutMapping("/updateBarcode")
 	public ResponseEntity<ProductDTO> updateBarcode(@RequestParam String oldBarcode, @RequestParam String newBarcode) {
 		Product product = productService.findByBarcode(oldBarcode);
@@ -121,6 +133,7 @@ public class ProductController {
 	}
 
 	// Ürün arama
+	@Operation(summary = "Ürün arama", description = "Ürünleri isme ve kategoriye göre arar.")
 	@GetMapping("/searchh")
 	public List<ProductDTO> searchProducts(@RequestParam(required = false) String name,
 			@RequestParam(required = false) String category) {
@@ -129,6 +142,7 @@ public class ProductController {
 	}
 
 	// Ürün filtreleme
+	@Operation(summary = "Ürün filtreleme", description = "Fiyat aralığı ve kategoriye göre ürünleri filtreler.")
 	@GetMapping("/filter")
 	public List<ProductDTO> filterProducts(@RequestParam(required = false) Double minPrice,
 			@RequestParam(required = false) Double maxPrice, @RequestParam(required = false) String category) {

@@ -23,8 +23,12 @@ import com.firatdemir.dto.UserRegistrationDTO;
 import com.firatdemir.model.User;
 import com.firatdemir.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Kullanıcı İşlemleri", description = "Kullanıcı oluşturma, silme, güncelleme ve listeleme işlemleri")
 public class UserController {
 
 	private final UserService userService;
@@ -36,6 +40,7 @@ public class UserController {
 		this.passwordEncoder = new BCryptPasswordEncoder(); // Şifreleme mekanizması
 	}
 
+	@Operation(summary = "Yeni kullanıcı kaydet", description = "Yeni bir kullanıcı oluşturur. Eğer aynı e-posta ile kullanıcı varsa, hata döner.")
 	@PostMapping(path = "/save")
 	public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO registrationDTO) {
 		// Aynı email ile kullanıcı var mı kontrol et
@@ -45,7 +50,7 @@ public class UserController {
 					.body("Bu e-posta adresi zaten kayıtlı: " + registrationDTO.getEmail());
 		}
 
-		// Şifreyi şifreliyoruz  BCrypt hashing ile 
+		// Şifreyi şifreliyoruz BCrypt hashing ile
 		String encryptedPassword = passwordEncoder.encode(registrationDTO.getPassword());
 
 		// DTO -> Entity
@@ -59,6 +64,7 @@ public class UserController {
 		return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
 	}
 
+	@Operation(summary = "Tüm kullanıcıları getir", description = "Veritabanındaki tüm kullanıcıları listeler.")
 	@GetMapping
 	public List<UserDTO> getAllUsers() {
 		List<User> users = userService.getAllUsers();
@@ -66,6 +72,7 @@ public class UserController {
 				.collect(Collectors.toList());
 	}
 
+	@Operation(summary = "ID ile kullanıcıyı getir", description = "Verilen ID'ye sahip kullanıcıyı getirir.")
 	@GetMapping("/{id}")
 	public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
 		Optional<User> user = userService.getUserById(id);
@@ -73,6 +80,7 @@ public class UserController {
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
+	@Operation(summary = "Kullanıcı sil", description = "Verilen ID'ye sahip kullanıcıyı siler.")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
 		userService.deleteUser(id);
