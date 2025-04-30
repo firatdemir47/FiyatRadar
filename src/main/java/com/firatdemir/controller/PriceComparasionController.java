@@ -23,45 +23,46 @@ import com.firatdemir.service.PriceComparisonService;
 public class PriceComparasionController {
 
 	private final PriceComparisonService priceComparisonService;
-    private final ProductRepository productRepository;  // ProductRepository'yi de inject ediyoruz
+	private final ProductRepository productRepository; // ProductRepository'yi de inject ediyoruz
 
-    @Autowired
-    public PriceComparasionController(PriceComparisonService priceComparisonService, ProductRepository productRepository) {
-        this.priceComparisonService = priceComparisonService;
-        this.productRepository = productRepository;
-    }
+	@Autowired
+	public PriceComparasionController(PriceComparisonService priceComparisonService,
+			ProductRepository productRepository) {
+		this.priceComparisonService = priceComparisonService;
+		this.productRepository = productRepository;
+	}
 
-	// fiyat karşılaştırma ekleme
-	
-    @PostMapping
-    public ResponseEntity<PriceComparasion> createPriceComparison(@RequestBody PriceComparisonDTO priceComparisonDTO) {
-        // PriceComparisonDTO'dan barcode alınıyor
-        Product product = productRepository.findByBarcode(priceComparisonDTO.getProductBarcode());
+	// fiyat karşılaştırma ekleme 
 
-        // Eğer product null ise, yeni product oluşturup kaydetmek
-        if (product == null) {
-            // Burada yeni bir ürün oluşturuluyor
-            product = new Product();
-            product.setBarcode(priceComparisonDTO.getProductBarcode());
-            product.setPrice(priceComparisonDTO.getPrice());
-            product.setStoreName(priceComparisonDTO.getStoreName());
-            product.setName("Default Product");  // Burada istersek name'i almak da gerekebilir
-            productRepository.save(product);  // Ürünü veritabanına kaydediyoruz
-        }
+	@PostMapping
+	public ResponseEntity<PriceComparasion> createPriceComparison(@RequestBody PriceComparisonDTO priceComparisonDTO) {
+		// PriceComparisonDTO'dan barcode alınıyor
+		Product product = productRepository.findByBarcode(priceComparisonDTO.getProductBarcode());
 
-        // PriceComparasion oluşturuluyor
-        PriceComparasion priceComparasion = new PriceComparasion();
-        priceComparasion.setProduct(product); // Ürünü PriceComparasion'a ilişkilendiriyoruz
-        priceComparasion.setPrice(priceComparisonDTO.getPrice());
-        priceComparasion.setStoreName(priceComparisonDTO.getStoreName());
-        
-        // PriceComparasion kaydediliyor
-        PriceComparasion createdPriceComparasion = priceComparisonService.savePriceComparasion(priceComparasion);
-        
-        return new ResponseEntity<>(createdPriceComparasion, HttpStatus.CREATED);
-    }
-	// tüm fiyat karşılaştırmaları ekleme
-	
+		// Eğer product null ise, yeni product oluşturup kaydetmek
+		if (product == null) {
+			// Burada yeni bir ürün oluşturuluyor
+			product = new Product();
+			product.setBarcode(priceComparisonDTO.getProductBarcode());
+			product.setPrice(priceComparisonDTO.getPrice());
+			product.setStoreName(priceComparisonDTO.getStoreName());
+			product.setName("Default Product"); // Burada istersek name'i almak da gerekebilir
+			productRepository.save(product); // Ürünü veritabanına kaydediyoruz
+		}
+
+		// PriceComparasion oluşturuluyor
+		PriceComparasion priceComparasion = new PriceComparasion();
+		priceComparasion.setProduct(product); // Ürünü PriceComparasion'a ilişkilendiriyoruz
+		priceComparasion.setPrice(priceComparisonDTO.getPrice());
+		priceComparasion.setStoreName(priceComparisonDTO.getStoreName());
+
+		// PriceComparasion kaydediliyor
+		PriceComparasion createdPriceComparasion = priceComparisonService.savePriceComparasion(priceComparasion);
+
+		return new ResponseEntity<>(createdPriceComparasion, HttpStatus.CREATED);
+	}
+	// tüm fiyat karşılaştırmaları listeleme
+
 	@GetMapping
 	public List<PriceComparisonDTO> getAllPriceComparisons() {
 		List<PriceComparasion> priceComparasions = priceComparisonService.getAllPriceComparasions();

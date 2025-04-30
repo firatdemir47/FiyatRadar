@@ -36,24 +36,27 @@ public class UserController {
 		this.passwordEncoder = new BCryptPasswordEncoder(); // Şifreleme mekanizması
 	}
 
-	// Kullanıcı ekleme
 	@PostMapping(path = "/save")
-	public ResponseEntity<UserDTO> createUser(@RequestBody UserRegistrationDTO registrationDTO) {
-	    // DTO'dan şifreyi alıyoruz
-	    String password = registrationDTO.getPassword();
+	public ResponseEntity<?> createUser(@RequestBody UserRegistrationDTO registrationDTO) {
+		// Aynı email ile kullanıcı var mı kontrol et
+		Optional<User> existingUser = userService.getUserByEmail(registrationDTO.getEmail());
+		if (existingUser.isPresent()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body("Bu e-posta adresi zaten kayıtlı: " + registrationDTO.getEmail());
+		}
 
-	    // Şifreyi şifreliyoruz
-	    String encryptedPassword = passwordEncoder.encode(password);
+		// Şifreyi şifreliyoruz  BCrypt hashing ile 
+		String encryptedPassword = passwordEncoder.encode(registrationDTO.getPassword());
 
-	    // DTO'yu Entity'ye çeviriyoruz
-	    User user = new User(null, registrationDTO.getUsername(), registrationDTO.getEmail(), encryptedPassword);
+		// DTO -> Entity
+		User user = new User(null, registrationDTO.getUsername(), registrationDTO.getEmail(), encryptedPassword);
 
-	    // Kullanıcıyı kaydediyoruz
-	    User createdUser = userService.SaveUser(user);
+		// Kaydet
+		User createdUser = userService.SaveUser(user);
 
-	    // Geriye döndürülecek DTO'yu oluşturuyoruz (şifre içermez)
-	    UserDTO createdUserDTO = new UserDTO(createdUser.getUsername(), createdUser.getEmail());
-	    return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
+		// Geriye DTO dön
+		UserDTO createdUserDTO = new UserDTO(createdUser.getUsername(), createdUser.getEmail());
+		return new ResponseEntity<>(createdUserDTO, HttpStatus.CREATED);
 	}
 
 	@GetMapping

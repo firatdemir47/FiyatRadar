@@ -40,4 +40,8 @@ public class UserService {
 	public void deleteUser(Long id) {
 		userRepository.deleteById(id);
 	}
+	// Eposta ile kullanıcıyı bul
+		public Optional<User> getUserByEmail(String email) {
+			return userRepository.findByEmail(email);
+		}
 }

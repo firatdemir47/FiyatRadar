@@ -21,6 +21,7 @@ import com.firatdemir.dto.ProductDTO;
 import com.firatdemir.mapper.ProductMapper;
 import com.firatdemir.model.PriceComparasion;
 import com.firatdemir.model.Product;
+
 import com.firatdemir.service.ProductService;
 
 @RestController
@@ -29,13 +30,16 @@ public class ProductController {
 
 	private final ProductService productService;
 	private final ProductMapper productMapper;
-
+	
 	@Autowired
 	public ProductController(ProductService productService, ProductMapper productMapper) {
 		this.productService = productService;
 		this.productMapper = productMapper;
+		
 	}
-	//ürünün fiyatlarını karşılaştırmak için 
+	
+	 
+	// ürünün fiyatlarını karşılaştırmak için
 	@GetMapping("/{barcode}/compare-prices")
 	public List<PriceComparasion> getPriceComparisons(@PathVariable String barcode) {
 		return productService.getPriceComparisonsByBarcode(barcode);
@@ -117,7 +121,7 @@ public class ProductController {
 	}
 
 	// Ürün arama
-	@GetMapping("/search")
+	@GetMapping("/searchh")
 	public List<ProductDTO> searchProducts(@RequestParam(required = false) String name,
 			@RequestParam(required = false) String category) {
 		List<Product> products = productService.searchProducts(name, category);
