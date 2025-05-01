@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.firatdemir.dto.ProductDTO;
+import com.firatdemir.exception.ResourceNotFoundException;
 import com.firatdemir.mapper.ProductMapper;
 import com.firatdemir.model.PriceComparasion;
 import com.firatdemir.model.Product;
@@ -100,6 +101,16 @@ public class ProductController {
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 		}
+	}
+
+	@GetMapping("/barcode/{barcode}")
+	@Operation(summary = "Barkod ile ürün getirme", description = "Bu operasyon, verilen barkod ile ürünü arar ve detaylarını döndürür.")
+	public ResponseEntity<Product> getProductByBarcode(@PathVariable String barcode) {
+		Product product = productService.getProductByBarcode(barcode);
+		if (product == null) {
+			throw new ResourceNotFoundException("Bu barkoda sahip ürün bulunamadı: " + barcode);
+		}
+		return ResponseEntity.ok(product);
 	}
 
 	// barcode fiyatını güncelleyen endpoint

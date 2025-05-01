@@ -1,4 +1,5 @@
 package com.firatdemir.service;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
@@ -23,27 +24,26 @@ import com.firatdemir.repository.ProductRepository;
 
 @Service
 public class ProductService {
-	  
+
 	private final ProductRepository productRepository;
 	private final PriceComparisonRepository priceComparisonRepository;
 	private final ProductMapper productMapper;
-  
-   
+
 	@Autowired
-	public ProductService(ProductRepository productRepository,
-	                      PriceComparisonRepository priceComparisonRepository,
-	                      ProductMapper productMapper) {
-	    this.productRepository = productRepository;
-	    this.priceComparisonRepository = priceComparisonRepository;
-	    this.productMapper = productMapper;
-	    
+	public ProductService(ProductRepository productRepository, PriceComparisonRepository priceComparisonRepository,
+			ProductMapper productMapper) {
+		this.productRepository = productRepository;
+		this.priceComparisonRepository = priceComparisonRepository;
+		this.productMapper = productMapper;
+
 	}
-	
+
 	// Ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
 		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
 		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
-		//validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif edilecek 
+		// validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif
+		// edilecek
 		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
 
 		Product product = productMapper.toEntity(productDTO); // DTO'yu entity'ye dönüştür
@@ -67,8 +67,8 @@ public class ProductService {
 		isBarcodeValid(productDTO.getBarcode()); // Barkod kontrolü
 		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
 
-		 
-		//validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif edilecek 
+		// validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif
+		// edilecek
 
 		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
 
@@ -96,6 +96,12 @@ public class ProductService {
 
 	// Barkodla ürün arama
 	public Product findByBarcode(String barcode) {
+		return productRepository.findByBarcode(barcode);
+	}
+
+	// Barkod ile ürün arar ve ürünü döndürür
+	public Product getProductByBarcode(String barcode) {
+		isBarcodeValid(barcode); // Geçerli barkod mu kontrol et
 		return productRepository.findByBarcode(barcode);
 	}
 
