@@ -35,29 +35,71 @@ public class CimriClientService {
 		// API'den gelen her bir ürünü işleyerek Product objesine dönüştür
 		for (JsonNode productNode : productsNode) {
 			Product product = new Product();
-			product.setBarcode(productNode.path("id").asText()); // Eğer API'deki id barkod ise
-			product.setCategory(productNode.path("category").asText());
-			product.setName(productNode.path("name").asText());
-			product.setDescription(productNode.path("description").asText());
-			product.setPrice(productNode.path("price").asDouble());
-			
-			product.setStoreName(productNode.path("merchant_logo").asText()); // Ya da mağaza adı
 
-			// Veritabanına kaydedin
+			product.setBarcode(productNode.path("id").asText());
+			product.setCategory(productNode.path("category").asText(""));
+			product.setBrand(productNode.path("brand").asText(""));
+			product.setName(productNode.path("name").asText(""));
+			product.setUnitPrice(productNode.path("unit_price").asDouble());
+			product.setDescription(productNode.path("description").asText(""));
+			product.setQuantity(productNode.path("quantity").asText(""));
+			product.setUnit(productNode.path("unit").asText(""));
+			product.setMerchantId(productNode.path("merchant_id").asInt(0));
+			product.setPrice(productNode.path("price").asDouble());
+			product.setStoreName(productNode.path("merchant_logo").asText(""));
+			product.setMerchantLogo(productNode.path("merchant_logo").asText(""));
+			product.setImage(productNode.path("image").asText(""));
+			product.setUrl(productNode.path("url").asText(""));
+
 			productRepository.save(product);
+
 			products.add(product);
 		}
 
 		return products;
 	}
-	// Barkod ile ürün arama servisi
-    public Product searchProductByBarcode(String barcode) {
-        String apiUrl = "http://cimri.com/api/product/searchByBarcode?barcode=" + barcode;
-        
-        // API'den veri çekiyoruz
-        ResponseEntity<Product> response = restTemplate.exchange(
-                apiUrl, HttpMethod.GET, null, Product.class);
 
-        return response.getBody();
-    }
+	public List<Product> fetchAllProducts() {
+		List<Product> allProducts = new ArrayList<>();
+		String url = "http://127.0.0.1:8000/api.php?q=" + UriUtils.encode("", StandardCharsets.UTF_8);
+		ResponseEntity<JsonNode> response = restTemplate.getForEntity(url, JsonNode.class);
+
+		JsonNode productsNode = response.getBody().path("products");
+
+		for (JsonNode productNode : productsNode) {
+			Product product = new Product();
+
+			// API'den gelen her bir ürünü işleyerek Product objesine dönüştür
+			product.setBarcode(productNode.path("id").asText()); // Barkod
+			product.setCategory(productNode.path("category").asText()); // Kategori
+			product.setBrand(productNode.path("brand").asText()); // Marka
+			product.setName(productNode.path("name").asText()); // Ürün adı
+			product.setUnitPrice(productNode.path("unitPrice").asDouble()); // Birim fiyat
+			product.setDescription(productNode.path("description").asText()); // Açıklama
+			product.setQuantity(productNode.path("quantity").asText()); // Miktar
+			product.setUnit(productNode.path("unit").asText()); // Birim
+			product.setMerchantId(productNode.path("merchantId").asInt()); // Satıcı ID
+			product.setPrice(productNode.path("price").asDouble()); // Fiyat
+			product.setStoreName(productNode.path("storeName").asText()); // Mağaza adı
+			product.setMerchantLogo(productNode.path("merchantLogo").asText()); // Mağaza logosu
+			product.setImage(productNode.path("image").asText()); // Resim
+			product.setUrl(productNode.path("url").asText()); // URL
+
+			// Ürünü veritabanına kaydet
+			productRepository.save(product);
+			allProducts.add(product);
+		}
+
+		return allProducts;
+	}
+
+	// Barkod ile ürün arama servisi
+	public Product searchProductByBarcode(String barcode) {
+		String apiUrl = "http://cimri.com/api/product/searchByBarcode?barcode=" + barcode;
+
+		// API'den veri çekiyoruz
+		ResponseEntity<Product> response = restTemplate.exchange(apiUrl, HttpMethod.GET, null, Product.class);
+
+		return response.getBody();
+	}
 }

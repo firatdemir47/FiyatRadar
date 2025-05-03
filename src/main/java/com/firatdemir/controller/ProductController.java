@@ -49,14 +49,20 @@ public class ProductController {
 	public List<PriceComparasion> getPriceComparisons(@PathVariable String barcode) {
 		return productService.getPriceComparisonsByBarcode(barcode);
 	}
-
-	// Ürün ekleme
+	
 	@Operation(summary = "Yeni ürün ekle", description = "Yeni bir ürün ekler.")
 	@PostMapping("/save")
 	public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
-		Product product = productService.saveProduct(productDTO);
-		return new ResponseEntity<>(productMapper.toDTO(product), HttpStatus.CREATED); // DTO'ya dönüştürüp döndür
+	    // Ürünü doğrudan DTO olarak gönderiyoruz
+	    Product savedProduct = productService.saveProduct(productDTO);
+
+	    // DTO'ya çevirip döndür
+	    ProductDTO productDTOResponse = productMapper.toDTO(savedProduct);
+	    return new ResponseEntity<>(productDTOResponse, HttpStatus.CREATED);
 	}
+
+
+	
 
 	// Ürünleri listeleme
 	@Operation(summary = "Tüm ürünleri getir", description = "Veritabanındaki tüm ürünleri listeler")
@@ -145,7 +151,7 @@ public class ProductController {
 
 	// Ürün arama
 	@Operation(summary = "Ürün arama", description = "Ürünleri isme ve kategoriye göre arar.")
-	@GetMapping("/searchh")
+	@GetMapping("/search")
 	public List<ProductDTO> searchProducts(@RequestParam(required = false) String name,
 			@RequestParam(required = false) String category) {
 		List<Product> products = productService.searchProducts(name, category);

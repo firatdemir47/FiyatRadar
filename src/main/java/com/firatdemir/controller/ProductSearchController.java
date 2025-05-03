@@ -45,7 +45,12 @@ public class ProductSearchController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
+    @GetMapping("/fetchAll")
+    public ResponseEntity<List<Product>> fetchAllProducts() {
+        List<Product> products = cimriClientService.fetchAllProducts();
+        return ResponseEntity.ok(products);
+    }
+    
 	//istek attığımızda tüm sayfayı veri tabanına ekler 
 	@GetMapping("/search")
 	public ResponseEntity<List<Product>> search(@RequestParam String q) {

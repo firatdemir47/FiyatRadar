@@ -38,16 +38,14 @@ public class ProductService {
 
 	}
 
-	// Ürün ekleme
+	// ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
-		isBarcodeValid(productDTO.getBarcode()); // Barkod geçerli mi kontrol et
-		validatePrice(productDTO.getPrice()); // Fiyat kontrolü
-		// validateStock(productDTO.getStock()); // Stok kontrolü daha sonra aktif
-		// edilecek
-		validateProductName(productDTO.getProductName()); // Ürün adı kontrolü
+		isBarcodeValid(productDTO.getBarcode());
+		validatePrice(productDTO.getPrice());
+		validateProductName(productDTO.getProductName());
 
-		Product product = productMapper.toEntity(productDTO); // DTO'yu entity'ye dönüştür
-		return productRepository.save(product); // Ürünü kaydet
+		Product product = productMapper.toEntity(productDTO);
+		return productRepository.save(product);
 	}
 
 	// Tüm ürünleri listeleme

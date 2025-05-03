@@ -22,14 +22,33 @@ public class ProductDTO {
 	@Size(min = 12, max = 12, message = "Barkod 12 haneli olmalıdır.")
 	private String barcode;
 
+	private String brand;
+
 	private String description;
+
+	private Double unitPrice;
+
+	private String quantity;
+
+	private String unit;
+
+	private Integer merchantId;
+
+	private String merchantLogo;
+
+	private String image;
+
+	private String url;
+	
+	private String category;
 
 	@Positive(message = "Fiyat pozitif olmalıdır.")
 	private double price;
 
-	/*@PositiveOrZero(message = "Stok negatif olamaz.")
-	private int stock;*/
-	
+	/*
+	 * @PositiveOrZero(message = "Stok negatif olamaz.") private int stock;
+	 */
+
 	private String storeName;
 
 }
