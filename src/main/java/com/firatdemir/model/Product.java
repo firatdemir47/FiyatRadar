@@ -37,7 +37,7 @@ public class Product {
 	private String description; // Ürünün açıklaması
 
 	private String quantity;
-
+	
 	private String unit;
 
 	private Integer merchantId;

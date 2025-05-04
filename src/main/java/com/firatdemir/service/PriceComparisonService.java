@@ -17,7 +17,11 @@ public class PriceComparisonService {
 	public PriceComparisonService(PriceComparisonRepository priceComparisonRepository) {
 		this.priceComparisonRepository = priceComparisonRepository;
 	}
-
+	public List<PriceComparasion> getByProductId(Long productId) {
+	    return priceComparisonRepository.findByProductId(productId);
+	}
+	
+	
 	// Fiyat karşılaştırma ekleme
 	public PriceComparasion savePriceComparasion(PriceComparasion priceComparasion) {
 		return priceComparisonRepository.save(priceComparasion);

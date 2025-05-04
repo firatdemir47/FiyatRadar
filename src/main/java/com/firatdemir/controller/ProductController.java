@@ -22,7 +22,6 @@ import com.firatdemir.exception.ResourceNotFoundException;
 import com.firatdemir.mapper.ProductMapper;
 import com.firatdemir.model.PriceComparasion;
 import com.firatdemir.model.Product;
-
 import com.firatdemir.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,12 +35,16 @@ public class ProductController {
 	private final ProductService productService;
 	private final ProductMapper productMapper;
 	
+	
 	@Autowired
 	public ProductController(ProductService productService, ProductMapper productMapper) {
 		this.productService = productService;
 		this.productMapper = productMapper;
 
 	}
+
+
+
 
 	// ürünün fiyatlarını karşılaştırmak için
 	@Operation(summary = "Ürün fiyatlarını karşılaştır", description = "Barkod bilgisi ile ürünlerin fiyatlarını karşılaştırır.")

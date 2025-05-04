@@ -24,6 +24,8 @@ public class ProductSearchController {
 	public ProductSearchController(CimriClientService cimriClientService) {
 		this.cimriClientService = cimriClientService;
 	}
+
+
 	// Barkod ile ürün arama
     @Operation(summary = "Barkod ile ürün arama", description = "Barkod bilgisi ile bir ürünü arar.")
     @GetMapping("/searchByBarcode")

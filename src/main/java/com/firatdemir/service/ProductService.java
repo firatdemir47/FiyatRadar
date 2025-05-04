@@ -1,18 +1,14 @@
 package com.firatdemir.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.firatdemir.dto.ProductDTO;
+
 import com.firatdemir.exception.InvalidBarcodeException;
 import com.firatdemir.exception.InvalidProductException;
 import com.firatdemir.exception.ResourceNotFoundException;
@@ -24,7 +20,6 @@ import com.firatdemir.repository.ProductRepository;
 
 @Service
 public class ProductService {
-
 	private final ProductRepository productRepository;
 	private final PriceComparisonRepository priceComparisonRepository;
 	private final ProductMapper productMapper;
@@ -37,7 +32,7 @@ public class ProductService {
 		this.productMapper = productMapper;
 
 	}
-
+	
 	// ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
 		isBarcodeValid(productDTO.getBarcode());
@@ -58,6 +53,8 @@ public class ProductService {
 		return productRepository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 	}
+	
+	
 
 	// Ürün güncelleme
 

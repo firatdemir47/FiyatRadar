@@ -26,38 +26,67 @@ public class CimriClientService {
 	}
 
 	public List<Product> searchProduct(String query) {
-		String url = "http://127.0.0.1:8000/api.php?q=" + UriUtils.encode(query, StandardCharsets.UTF_8);
-		ResponseEntity<JsonNode> response = restTemplate.getForEntity(url, JsonNode.class);
+		List<Product> allProducts = new ArrayList<>();
 
-		JsonNode productsNode = response.getBody().path("products");
-		List<Product> products = new ArrayList<>();
+		int currentPage = 1;
+		int totalPages = 1;
 
-		// API'den gelen her bir ürünü işleyerek Product objesine dönüştür
-		for (JsonNode productNode : productsNode) {
-			Product product = new Product();
+		do {
+			String url = "http://127.0.0.1:8000/api.php?q=" + UriUtils.encode(query, StandardCharsets.UTF_8) + "&page="
+					+ currentPage;
 
-			product.setBarcode(productNode.path("id").asText());
-			product.setCategory(productNode.path("category").asText(""));
-			product.setBrand(productNode.path("brand").asText(""));
-			product.setName(productNode.path("name").asText(""));
-			product.setUnitPrice(productNode.path("unit_price").asDouble());
-			product.setDescription(productNode.path("description").asText(""));
-			product.setQuantity(productNode.path("quantity").asText(""));
-			product.setUnit(productNode.path("unit").asText(""));
-			product.setMerchantId(productNode.path("merchant_id").asInt(0));
-			product.setPrice(productNode.path("price").asDouble());
-			product.setStoreName(productNode.path("merchant_logo").asText(""));
-			product.setMerchantLogo(productNode.path("merchant_logo").asText(""));
-			product.setImage(productNode.path("image").asText(""));
-			product.setUrl(productNode.path("url").asText(""));
+			ResponseEntity<JsonNode> response = restTemplate.getForEntity(url, JsonNode.class);
+			JsonNode root = response.getBody();
 
-			productRepository.save(product);
+			JsonNode pagination = root.path("pagination");
+			currentPage = pagination.path("current_page").asInt();
+			totalPages = pagination.path("total_pages").asInt();
 
-			products.add(product);
-		}
+			JsonNode productsNode = root.path("products");
 
-		return products;
+			for (JsonNode productNode : productsNode) {
+				String barcode = productNode.path("id").asText();
+
+				try {
+					// Barkod zaten varsa bu ürünü atla
+					if (productRepository.existsByBarcode(barcode)) {
+						continue;
+					}
+
+					Product product = new Product();
+
+					product.setBarcode(barcode);
+					product.setCategory(productNode.path("category").asText(""));
+					product.setBrand(productNode.path("brand").asText(""));
+					product.setName(productNode.path("name").asText(""));
+					product.setUnitPrice(productNode.path("unit_price").asDouble());
+					product.setDescription(productNode.path("description").asText(""));
+					product.setQuantity(productNode.path("quantity").asText(""));
+					product.setUnit(productNode.path("unit").asText(""));
+					product.setMerchantId(productNode.path("merchant_id").asInt(0));
+					product.setPrice(productNode.path("price").asDouble());
+					product.setStoreName(productNode.path("merchant_logo").asText(""));
+					product.setMerchantLogo(productNode.path("merchant_logo").asText(""));
+					product.setImage(productNode.path("image").asText(""));
+					product.setUrl(productNode.path("url").asText(""));
+
+					productRepository.save(product);
+					allProducts.add(product);
+
+				} catch (Exception e) {
+					// Hata varsa logla, işlemi kesmeden devam et
+					System.err.println("Ürün eklenemedi (barkod: " + barcode + "): " + e.getMessage());
+				}
+			}
+
+			currentPage++;
+
+		} while (currentPage <= totalPages);
+
+		return allProducts;
 	}
+
+	
 
 	public List<Product> fetchAllProducts() {
 		List<Product> allProducts = new ArrayList<>();
