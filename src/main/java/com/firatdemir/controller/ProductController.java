@@ -43,8 +43,7 @@ public class ProductController {
 
 	}
 
-
-
+	
 
 	// ürünün fiyatlarını karşılaştırmak için
 	@Operation(summary = "Ürün fiyatlarını karşılaştır", description = "Barkod bilgisi ile ürünlerin fiyatlarını karşılaştırır.")

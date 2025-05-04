@@ -5,8 +5,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.firatdemir.dto.ProductDTO;
 
 import com.firatdemir.exception.InvalidBarcodeException;
@@ -23,8 +27,11 @@ public class ProductService {
 	private final ProductRepository productRepository;
 	private final PriceComparisonRepository priceComparisonRepository;
 	private final ProductMapper productMapper;
-
-	@Autowired
+	
+    @Autowired
+	private RestTemplate restTemplate;
+	
+    @Autowired
 	public ProductService(ProductRepository productRepository, PriceComparisonRepository priceComparisonRepository,
 			ProductMapper productMapper) {
 		this.productRepository = productRepository;
@@ -33,6 +40,8 @@ public class ProductService {
 
 	}
 	
+   
+    
 	// ürün ekleme
 	public Product saveProduct(ProductDTO productDTO) {
 		isBarcodeValid(productDTO.getBarcode());

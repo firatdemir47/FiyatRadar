@@ -3,6 +3,7 @@ package com.firatdemir.service;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +49,17 @@ public class CimriClientService {
 				String barcode = productNode.path("id").asText();
 
 				try {
-					// Barkod zaten varsa bu ürünü atla
-					if (productRepository.existsByBarcode(barcode)) {
+					Product existingProduct = productRepository.findByBarcode(barcode);
+					if (existingProduct != null) {
+						existingProduct.setPrice(productNode.path("price").asDouble());
+						existingProduct.setUnitPrice(productNode.path("unit_price").asDouble());
+						existingProduct.setQuantity(productNode.path("quantity").asText(""));
+						existingProduct.setMerchantLogo(productNode.path("merchant_logo").asText(""));
+						existingProduct.setStoreName(productNode.path("merchant_logo").asText("")); // Aynı logo
+																									// alanıysa
+						existingProduct.setUrl(productNode.path("url").asText(""));
+						productRepository.save(existingProduct);
+						allProducts.add(existingProduct);
 						continue;
 					}
 
@@ -85,8 +95,6 @@ public class CimriClientService {
 
 		return allProducts;
 	}
-
-	
 
 	public List<Product> fetchAllProducts() {
 		List<Product> allProducts = new ArrayList<>();

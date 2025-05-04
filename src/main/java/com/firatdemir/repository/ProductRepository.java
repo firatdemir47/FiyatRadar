@@ -10,7 +10,9 @@ import com.firatdemir.model.Product;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-
+	
+	Product findByUrl(String url);
+	
 	boolean existsByBarcode(String barcode);
 
 	Product findByBarcode(String barcode);
