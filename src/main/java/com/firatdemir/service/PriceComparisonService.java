@@ -1,10 +1,12 @@
 package com.firatdemir.service;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -32,133 +34,140 @@ public class PriceComparisonService {
 		this.restTemplate = new RestTemplate();
 		this.objectMapper = new ObjectMapper();
 	}
+
+	/*
+	 * //eğer o ürün o gün güncellendi ise o ürünü atlar burası daha sonra aktif
+	 * edilecek
+	 * 
+	 * @Scheduled(cron = "0 0 2 * * *") // Her gün sabah 02:00'de çalışır public
+	 * void updateAllPriceComparisons() { List<Product> allProducts =
+	 * productRepository.findAll();
+	 * 
+	 * // URL'leri tekilleştiriyoruz List<String> distinctUrls =
+	 * allProducts.stream() .map(Product::getUrl) .distinct() .toList();
+	 * 
+	 * for (String encodedUrl : distinctUrls) { // Bu URL'ye sahip olan ürünü al
+	 * Product relatedProduct = productRepository.findByUrl(encodedUrl);
+	 * 
+	 * // Ürün null ise geç if (relatedProduct == null) {
+	 * System.out.println("Ürün bulunamadı: " + encodedUrl); continue; }
+	 * 
+	 * // Eğer ürün zaten bugün güncellenmişse, istek atma if
+	 * (LocalDate.now().equals(relatedProduct.getLastUpdated())) {
+	 * System.out.println("Bugün zaten güncellenmiş: " + relatedProduct.getId());
+	 * continue; }
+	 * 
+	 * String productPath = encodedUrl.replace("/product.php?path=", "")
+	 * .replace("%2F", "/") .replace("%2C", ",");
+	 * 
+	 * URI uri =
+	 * UriComponentsBuilder.fromHttpUrl("http://localhost:8000/product.php")
+	 * .queryParam("path", productPath) .build().encode().toUri();
+	 * 
+	 * try { System.out.println("İstek atılıyor: " + uri); String response =
+	 * restTemplate.getForObject(uri, String.class);
+	 * 
+	 * JsonNode root = objectMapper.readTree(response); JsonNode offers =
+	 * root.path("product").path("offers");
+	 * 
+	 * if (offers.isArray()) { for (JsonNode offer : offers) { String storeName =
+	 * offer.path("merchant_name").asText(); double price =
+	 * offer.path("price").asDouble();
+	 * 
+	 * Optional<PriceComparasion> existing = priceComparisonRepository
+	 * .findByStoreNameAndProduct(storeName, relatedProduct);
+	 * 
+	 * if (existing.isPresent()) { // Mevcut kaydın fiyatını güncelle
+	 * PriceComparasion pc = existing.get(); pc.setPrice(price);
+	 * priceComparisonRepository.save(pc); System.out.println("Fiyat güncellendi: "
+	 * + storeName + " - " + price + " -> product: " + relatedProduct.getId());
+	 * continue; }
+	 * 
+	 * // Yeni kayıt oluştur PriceComparasion pc = new PriceComparasion();
+	 * pc.setProduct(relatedProduct); pc.setStoreName(storeName);
+	 * pc.setPrice(price); pc.setUrl(encodedUrl);
+	 * 
+	 * priceComparisonRepository.save(pc); System.out.println("Eklendi: " +
+	 * storeName + " - " + price + " -> product: " + relatedProduct.getId()); }
+	 * 
+	 * // Ürünün güncelleme tarihini bugünün tarihi yap
+	 * relatedProduct.setLastUpdated(LocalDate.now());
+	 * productRepository.save(relatedProduct); } else {
+	 * System.out.println("Fiyat bilgisi yok: " + uri); }
+	 * 
+	 * } catch (HttpClientErrorException e) { System.out.println("HTTP Hatası: " +
+	 * e.getStatusCode() + " - " + e.getResponseBodyAsString()); } catch (Exception
+	 * e) { System.out.println("Hata: " + e.getMessage()); } } }
+	 */
 	
+	// her gün 2 de istek atacak şekilde zamanlama kuruldu
+	@Scheduled(cron = "0 0 2 * * *") // Her gün sabah 02:00'de çalışır
 	public void updateAllPriceComparisons() {
-        // Tüm ürünleri veri tabanından çek
-        List<Product> allProducts = productRepository.findAll();
-        
-        for (Product product : allProducts) {
-            String encodedProductUrl = product.getUrl(); // Ör: /product.php?path=bal-ve-recel%2Fen-ucuz-...
-            // productPath'i oluştur: Ör: bal-ve-recel/en-ucuz-...
-            String productPath = encodedProductUrl.replace("/product.php?path=", "")
-                                                 .replace("%2F", "/")
-                                                 .replace("%2C", ",");
+		List<Product> allProducts = productRepository.findAll();
 
-            URI uri = UriComponentsBuilder.fromHttpUrl("http://localhost:8000/product.php")
-                    .queryParam("path", productPath)
-                    .build().encode().toUri();
+		// URL'leri tekilleştiriyoruz
+		List<String> distinctUrls = allProducts.stream().map(Product::getUrl).distinct().toList();
 
-            try {
-                System.out.println("İstek atılıyor: " + uri);
-                String response = restTemplate.getForObject(uri, String.class);
-                System.out.println("Yanıt alındı for product " + product.getId() + ": " + response);
+		for (String encodedUrl : distinctUrls) {
+			String productPath = encodedUrl.replace("/product.php?path=", "").replace("%2F", "/").replace("%2C", ",");
 
-                JsonNode root = objectMapper.readTree(response);
-                JsonNode offers = root.path("product").path("offers");
+			URI uri = UriComponentsBuilder.fromHttpUrl("http://localhost:8000/product.php")
+					.queryParam("path", productPath).build().encode().toUri();
 
-                if (offers.isArray()) {
-                    // Ürün URL'si ile ürünü bul
-                    Product existingProduct = productRepository.findByUrl(encodedProductUrl);
-                    if (existingProduct == null) {
-                        System.out.println("Ürün bulunamadı: " + encodedProductUrl);
-                        continue;
-                    }
+			try {
+				System.out.println("İstek atılıyor: " + uri);
+				String response = restTemplate.getForObject(uri, String.class);
 
-                    for (JsonNode offer : offers) {
-                        String storeName = offer.path("merchant_name").asText();
-                        double price = offer.path("price").asDouble();
+				JsonNode root = objectMapper.readTree(response);
+				JsonNode offers = root.path("product").path("offers");
 
-                        // Aynı mağaza ve ürün kombinasyonunu kontrol et
-                        Optional<PriceComparasion> existingComparison = priceComparisonRepository
-                                .findByStoreNameAndProduct(storeName, existingProduct);
+				if (offers.isArray()) {
+					// Bu URL'ye sahip olan ürünü al
+					Product relatedProduct = productRepository.findByUrl(encodedUrl);
 
-                        if (existingComparison.isPresent()) {
-                            System.out.println("Bu mağaza ve ürün kombinasyonu zaten mevcut: " + storeName + 
-                                              " for product: " + existingProduct.getId());
-                            continue;
-                        }
+					// Eğer ürün bulunduysa
+					if (relatedProduct != null) {
+						for (JsonNode offer : offers) {
+							String storeName = offer.path("merchant_name").asText();
+							double price = offer.path("price").asDouble();
 
-                        // Yeni fiyat karşılaştırması oluştur ve kaydet
-                        PriceComparasion comparison = new PriceComparasion();
-                        comparison.setProduct(existingProduct);
-                        comparison.setStoreName(storeName);
-                        comparison.setPrice(price);
-                        comparison.setUrl(encodedProductUrl);
+							Optional<PriceComparasion> existing = priceComparisonRepository
+									.findByStoreNameAndProduct(storeName, relatedProduct);
 
-                        priceComparisonRepository.save(comparison);
-                        System.out.println("Fiyat eklendi: " + storeName + " - " + price + 
-                                          " for product: " + existingProduct.getId());
-                    }
-                } else {
-                    System.out.println("Fiyat bilgisi bulunamadı: " + uri);
-                }
-            } catch (HttpClientErrorException e) {
-                System.out.println("HTTP Hatası for product " + product.getId() + ": " + 
-                                  e.getStatusCode() + " - " + e.getResponseBodyAsString());
-            } catch (Exception e) {
-                System.out.println("Genel Hata for product " + product.getId() + ": " + e.getMessage());
-            }
-        }
-    }
+							if (existing.isPresent()) {
+								// Mevcut kaydın fiyatını güncelle
+								PriceComparasion pc = existing.get();
+								pc.setPrice(price); // Fiyatı güncelle
+								priceComparisonRepository.save(pc); // Güncellenmiş veriyi kaydet
+								System.out.println("Fiyat güncellendi: " + storeName + " - " + price + " -> product: "
+										+ relatedProduct.getId());
+								continue;
+							}
 
+							PriceComparasion pc = new PriceComparasion();
+							pc.setProduct(relatedProduct);
+							pc.setStoreName(storeName);
+							pc.setPrice(price);
+							pc.setUrl(encodedUrl);
 
-
-	/*public void updateSinglePriceComparison() {
-		String productPath = "sebze/en-ucuz-domates-kg-fiyatlari,1173365";
-		String productUrl = "/product.php";
-		String encodedProductUrl = "/product.php?path=sebze%2Fen-ucuz-domates-kg-fiyatlari%2C1173365";
-		URI uri = UriComponentsBuilder.fromHttpUrl("http://localhost:8000" + productUrl).queryParam("path", productPath)
-				.build().encode().toUri();
-
-		try {
-			System.out.println("İstek atılıyor: " + uri);
-			String response = restTemplate.getForObject(uri, String.class);
-			System.out.println("Yanıt alındı: " + response);
-
-			JsonNode root = objectMapper.readTree(response);
-			JsonNode offers = root.path("product").path("offers");
-
-			if (offers.isArray()) {
-				// Ürün URL'si ile ürünü buluyoruz
-				Product product = productRepository.findByUrl(encodedProductUrl);
-				if (product == null) {
-					System.out.println("Ürün bulunamadı: " + encodedProductUrl);
-					return;
-				}
-
-				for (JsonNode offer : offers) {
-					String storeName = offer.path("merchant_name").asText();
-					double price = offer.path("price").asDouble();
-
-					// Aynı mağaza ve ürün kombinasyonunun daha önce kaydedilip kaydedilmediğini
-					// kontrol et
-					Optional<PriceComparasion> existingComparison = priceComparisonRepository
-							.findByStoreNameAndProduct(storeName, product);
-
-					if (existingComparison.isPresent()) {
-						System.out.println("Bu mağaza ve ürün kombinasyonu zaten mevcut: " + storeName);
-						continue; // Eğer varsa, bu mağaza için yeni fiyat eklemiyoruz
+							priceComparisonRepository.save(pc);
+							System.out.println(
+									"Eklendi: " + storeName + " - " + price + " -> product: " + relatedProduct.getId());
+						}
+					} else {
+						System.out.println("Ürün bulunamadı: " + encodedUrl);
 					}
-
-					// Yeni fiyat karşılaştırmasını oluştur ve kaydet
-					PriceComparasion comparison = new PriceComparasion();
-					comparison.setProduct(product);
-					comparison.setStoreName(storeName);
-					comparison.setPrice(price);
-					comparison.setUrl(encodedProductUrl);
-
-					priceComparisonRepository.save(comparison);
-					System.out.println("Fiyat eklendi: " + storeName + " - " + price);
+				} else {
+					System.out.println("Fiyat bilgisi yok: " + uri);
 				}
-			} else {
-				System.out.println("Fiyat bilgisi bulunamadı: " + uri);
+
+			} catch (HttpClientErrorException e) {
+				System.out.println("HTTP Hatası: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+			} catch (Exception e) {
+				System.out.println("Hata: " + e.getMessage());
 			}
-		} catch (HttpClientErrorException e) {
-			System.out.println("HTTP Hatası: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
-		} catch (Exception e) {
-			System.out.println("Genel Hata: " + e.getMessage());
 		}
-	}*/
+	}
 
 	public List<PriceComparasion> getByProductId(Long productId) {
 		return priceComparisonRepository.findByProductId(productId);

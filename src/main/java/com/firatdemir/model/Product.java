@@ -1,5 +1,7 @@
 package com.firatdemir.model;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,6 +27,10 @@ public class Product {
 	@Column(unique = true)
 	private String barcode; // Ürünün barkodu
 
+	// PriceComparisonService deki yer aktif edilirse burası da aktif edilcek
+	@Column(name = "last_updated")
+	private LocalDate lastUpdated;
+
 	@Column(name = "category")
 	private String category;
 
@@ -37,7 +43,7 @@ public class Product {
 	private String description; // Ürünün açıklaması
 
 	private String quantity;
-	
+
 	private String unit;
 
 	private Integer merchantId;

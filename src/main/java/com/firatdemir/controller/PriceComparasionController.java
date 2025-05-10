@@ -47,15 +47,7 @@ public class PriceComparasionController {
 		}
 	}
 
-	/*
-	 * @PostMapping("/update") public ResponseEntity<String> updatePrices() { try {
-	 * priceComparisonService.updateSinglePriceComparison(); return
-	 * ResponseEntity.ok("Fiyat karşılaştırmaları güncellendi."); } catch (Exception
-	 * e) { return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	 * .body("Fiyat karşılaştırmaları güncellenirken bir hata oluştu: " +
-	 * e.getMessage()); } }
-	 */
-	// fiyat karşılaştırma ekleme
+	
 	@Operation(summary = "Yeni fiyat karşılaştırması ekle", description = "Yeni fiyat karşılaştırması ekler. Eğer ürün yoksa, yeni ürün oluşturur.")
 	@PostMapping
 	public ResponseEntity<PriceComparasion> createPriceComparison(@RequestBody PriceComparisonDTO priceComparisonDTO) {
