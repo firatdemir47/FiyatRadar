@@ -32,8 +32,78 @@ public class PriceComparisonService {
 		this.restTemplate = new RestTemplate();
 		this.objectMapper = new ObjectMapper();
 	}
+	
+	public void updateAllPriceComparisons() {
+        // Tüm ürünleri veri tabanından çek
+        List<Product> allProducts = productRepository.findAll();
+        
+        for (Product product : allProducts) {
+            String encodedProductUrl = product.getUrl(); // Ör: /product.php?path=bal-ve-recel%2Fen-ucuz-...
+            // productPath'i oluştur: Ör: bal-ve-recel/en-ucuz-...
+            String productPath = encodedProductUrl.replace("/product.php?path=", "")
+                                                 .replace("%2F", "/")
+                                                 .replace("%2C", ",");
 
-	public void updateSinglePriceComparison() {
+            URI uri = UriComponentsBuilder.fromHttpUrl("http://localhost:8000/product.php")
+                    .queryParam("path", productPath)
+                    .build().encode().toUri();
+
+            try {
+                System.out.println("İstek atılıyor: " + uri);
+                String response = restTemplate.getForObject(uri, String.class);
+                System.out.println("Yanıt alındı for product " + product.getId() + ": " + response);
+
+                JsonNode root = objectMapper.readTree(response);
+                JsonNode offers = root.path("product").path("offers");
+
+                if (offers.isArray()) {
+                    // Ürün URL'si ile ürünü bul
+                    Product existingProduct = productRepository.findByUrl(encodedProductUrl);
+                    if (existingProduct == null) {
+                        System.out.println("Ürün bulunamadı: " + encodedProductUrl);
+                        continue;
+                    }
+
+                    for (JsonNode offer : offers) {
+                        String storeName = offer.path("merchant_name").asText();
+                        double price = offer.path("price").asDouble();
+
+                        // Aynı mağaza ve ürün kombinasyonunu kontrol et
+                        Optional<PriceComparasion> existingComparison = priceComparisonRepository
+                                .findByStoreNameAndProduct(storeName, existingProduct);
+
+                        if (existingComparison.isPresent()) {
+                            System.out.println("Bu mağaza ve ürün kombinasyonu zaten mevcut: " + storeName + 
+                                              " for product: " + existingProduct.getId());
+                            continue;
+                        }
+
+                        // Yeni fiyat karşılaştırması oluştur ve kaydet
+                        PriceComparasion comparison = new PriceComparasion();
+                        comparison.setProduct(existingProduct);
+                        comparison.setStoreName(storeName);
+                        comparison.setPrice(price);
+                        comparison.setUrl(encodedProductUrl);
+
+                        priceComparisonRepository.save(comparison);
+                        System.out.println("Fiyat eklendi: " + storeName + " - " + price + 
+                                          " for product: " + existingProduct.getId());
+                    }
+                } else {
+                    System.out.println("Fiyat bilgisi bulunamadı: " + uri);
+                }
+            } catch (HttpClientErrorException e) {
+                System.out.println("HTTP Hatası for product " + product.getId() + ": " + 
+                                  e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            } catch (Exception e) {
+                System.out.println("Genel Hata for product " + product.getId() + ": " + e.getMessage());
+            }
+        }
+    }
+
+
+
+	/*public void updateSinglePriceComparison() {
 		String productPath = "sebze/en-ucuz-domates-kg-fiyatlari,1173365";
 		String productUrl = "/product.php";
 		String encodedProductUrl = "/product.php?path=sebze%2Fen-ucuz-domates-kg-fiyatlari%2C1173365";
@@ -88,7 +158,7 @@ public class PriceComparisonService {
 		} catch (Exception e) {
 			System.out.println("Genel Hata: " + e.getMessage());
 		}
-	}
+	}*/
 
 	public List<PriceComparasion> getByProductId(Long productId) {
 		return priceComparisonRepository.findByProductId(productId);

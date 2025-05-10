@@ -36,17 +36,25 @@ public class PriceComparasionController {
 		this.productRepository = productRepository;
 	}
 
-	@PostMapping("/update")
-	public ResponseEntity<String> updatePrices() {
+	@PostMapping("/update-all")
+	public ResponseEntity<String> updateAllPrices() {
 		try {
-			priceComparisonService.updateSinglePriceComparison();
-			return ResponseEntity.ok("Fiyat karşılaştırmaları güncellendi.");
+			priceComparisonService.updateAllPriceComparisons();
+			return ResponseEntity.ok("Tüm ürünlerin fiyat karşılaştırmaları güncellendi.");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Fiyat karşılaştırmaları güncellenirken bir hata oluştu: " + e.getMessage());
 		}
 	}
 
+	/*
+	 * @PostMapping("/update") public ResponseEntity<String> updatePrices() { try {
+	 * priceComparisonService.updateSinglePriceComparison(); return
+	 * ResponseEntity.ok("Fiyat karşılaştırmaları güncellendi."); } catch (Exception
+	 * e) { return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	 * .body("Fiyat karşılaştırmaları güncellenirken bir hata oluştu: " +
+	 * e.getMessage()); } }
+	 */
 	// fiyat karşılaştırma ekleme
 	@Operation(summary = "Yeni fiyat karşılaştırması ekle", description = "Yeni fiyat karşılaştırması ekler. Eğer ürün yoksa, yeni ürün oluşturur.")
 	@PostMapping

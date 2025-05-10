@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import com.firatdemir.model.User;
 import com.firatdemir.repository.UserRepository;
 
-
-
 @Service
 public class UserService {
 
@@ -40,8 +38,15 @@ public class UserService {
 	public void deleteUser(Long id) {
 		userRepository.deleteById(id);
 	}
+
 	// Eposta ile kullanıcıyı bul
-		public Optional<User> getUserByEmail(String email) {
-			return userRepository.findByEmail(email);
-		}
+	public Optional<User> getUserByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
+
+	// Kullanıcı adı ile kullanıcıyı bul
+	public Optional<User> getUserByUsername(String username) {
+		return userRepository.findByUsername(username);
+	}
+
 }

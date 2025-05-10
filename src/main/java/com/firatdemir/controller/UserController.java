@@ -80,6 +80,23 @@ public class UserController {
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
+	@Operation(summary = "Kullanıcı girişi", description = "Kullanıcı adı ve şifre ile giriş yapar.")
+	@PostMapping("/login")
+	public ResponseEntity<String> login(@RequestBody UserRegistrationDTO loginDTO) {
+		Optional<User> userOptional = userService.getUserByUsername(loginDTO.getUsername());
+
+		if (userOptional.isPresent()) {
+			User user = userOptional.get();
+			if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+				return ResponseEntity.ok("Giriş başarılı. Hoş geldin " + user.getUsername());
+			} else {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Şifre yanlış.");
+			}
+		} else {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Kullanıcı bulunamadı.");
+		}
+	}
+
 	@Operation(summary = "Kullanıcı sil", description = "Verilen ID'ye sahip kullanıcıyı siler.")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
